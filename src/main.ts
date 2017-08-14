@@ -17,11 +17,13 @@ import { assert } from "./utils";
 const bus = Gio['DBus'].session;
 const secretBus = 'org.freedesktop.secrets';
 
-interface Item {
+export interface Item {
     label: string;
     path: string;
     locked?: boolean;
 }
+
+export type SecretCallback = (label: string, secret: string) => void;
 
 export function makeItem(label, path): Item {
     return {"label":label, "path":path};
@@ -65,7 +67,7 @@ export class KeyringConnection {
         sessionObj.CloseSync();
     }
     
-    private _getSecret(path: string, relock: boolean, callback: (label: string, secret: string) => void) {
+    private _getSecret(path: string, relock: boolean, callback: SecretCallback) {
         const item = new Interfaces.SecretItemProxy(bus, secretBus, path);
         
         const secret_res = item.GetSecretSync(this.session);
@@ -88,7 +90,7 @@ export class KeyringConnection {
      * If unlocking is needed this will only work if imports.mainloop is
      * running.
      */
-    getSecretFromPath(path, callback) {
+    getSecretFromPath(path: string, callback: SecretCallback) {
         this.unlockObject(path, (wasLockedBefore) => {
             this._getSecret(path, wasLockedBefore, callback);
         });
