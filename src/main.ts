@@ -14,10 +14,16 @@ import * as Lang from "Lang";
 import * as Interfaces from './keyring-interfaces';
 import { assert } from "./utils";
 
-const bus = Gio.DBus.session;
+const bus = Gio['DBus'].session;
 const secretBus = 'org.freedesktop.secrets';
 
-export function makeItem(label, path) {
+interface Item {
+    label: string;
+    path: string;
+    locked?: boolean;
+}
+
+export function makeItem(label, path): Item {
     return {"label":label, "path":path};
 }
 
@@ -29,7 +35,7 @@ export const KeyringConnection = new Lang.Class({
                 secretBus, '/org/freedesktop/secrets');
 
         let result = this.service.OpenSessionSync("plain",
-                GLib.Variant.new('s', ""));
+                GLib['Variant'].new('s', ""));
         this.session = result[1];
         
         this.signalConnections = []; // array of tuples [signalProvider, signalID]
@@ -78,9 +84,9 @@ export const KeyringConnection = new Lang.Class({
      * running.
      */
     getSecretFromPath: function(path, callback) {
-        this.unlockObject(path, Lang.bind(this, function(wasLockedBefore) {
+        this.unlockObject(path, (wasLockedBefore) => {
             this._getSecret(path, wasLockedBefore, callback);
-        }));
+        });
     },
     
     /**
@@ -98,10 +104,9 @@ export const KeyringConnection = new Lang.Class({
                     secretBus, ul_prompt_path);
             
             this.signalConnections.push([prompt,
-                prompt.connectSignal("Completed",
-                    Lang.bind(this, function (dismissed, result) {
-                        callback(true);
-                    }))]);
+                prompt.connectSignal("Completed", () => {
+                    callback(true);
+                })]);
             prompt.PromptSync("");
         } else {
             callback(false);
