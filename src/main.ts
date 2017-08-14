@@ -126,7 +126,7 @@ export class KeyringConnection {
     /**
      * Fetch the label of an item with the specified path.
      */
-    private _getItemLabelFromPath(path) {
+    getItemLabelFromPath(path) {
         if (this.labelCache[path]) {
             return this.labelCache[path];
         } else {
@@ -135,6 +135,11 @@ export class KeyringConnection {
             return item.Label;
         }
     }
+
+    getAllItemPaths(): string[] {
+        const searchResult = this.service.SearchItemsSync([]);
+        return searchResult[0].concat(searchResult[1]);
+    }
     
     /**
      * Return all secret items that match a number of search strings.
@@ -142,20 +147,19 @@ export class KeyringConnection {
      *                 label of matching secret items
      * @return An array of matching secret items (see makeItem for details)
      */
-    getItems(searchStrs: string[]) {
-        searchStrs.map(s => s.toLowerCase());
+    getItems(searchStrs: string[]): Item[] {
+        searchStrs = searchStrs.map(s => s.toLowerCase());
     
-        let searchResult = this.service.SearchItemsSync([]);
-        let allItems = searchResult[0].concat(searchResult[1]);
+        const allItems = this.getAllItemPaths();
+        
         let matchingItems = [];
         
-        for (let i in allItems) {
-            let path = allItems[i];
-            let label = this._getItemLabelFromPath(path);
+        for (const path of allItems) {
+            let label = this.getItemLabelFromPath(path);
             let labelLow = label.toLowerCase();
             let isMatch = true;
-            for (let j in searchStrs) {
-                if (labelLow.indexOf(searchStrs[j]) == -1) {
+            for (const s in searchStrs) {
+                if (labelLow.indexOf(s) === -1) {
                     isMatch = false;
                     break;
                 }
@@ -166,6 +170,10 @@ export class KeyringConnection {
         }
         
         return matchingItems;
+    }
+
+    getAllItems(): Item[] {
+        return this.getItems([]);
     }
     
     /**
