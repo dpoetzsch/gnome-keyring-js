@@ -27,10 +27,16 @@ export function makeItem(label, path): Item {
     return {"label":label, "path":path};
 }
 
-export const KeyringConnection = new Lang.Class({
-    Name: "KeyringConnection",
-    
-    _init: function() {
+// tuples [signalProvider, signalID]
+type SignalConnection = [any, string]
+
+export class KeyringConnection {
+    private service;
+    private session;
+    private signalConnections: SignalConnection[];
+    private labelCache;
+
+    constructor() {
         this.service = new Interfaces.SecretServiceProxy(bus,
                 secretBus, '/org/freedesktop/secrets');
 
@@ -38,7 +44,7 @@ export const KeyringConnection = new Lang.Class({
                 GLib['Variant'].new('s', ""));
         this.session = result[1];
         
-        this.signalConnections = []; // array of tuples [signalProvider, signalID]
+        this.signalConnections = [];
 
         // maps item paths to item labels because fetching the label
         // for a path is slow (around 5ms on my machine). We have to do
@@ -46,35 +52,34 @@ export const KeyringConnection = new Lang.Class({
         // so. Using the cache we have a major performance gain that even
         // allows searching as you type
         this.labelCache = {}
-    },
+    }
     
-    close: function() {
+    close() {
         // disconnect from all signals
-        for (let conId in this.signalConnections) {
-            let con = this.signalConnections[conId];
+        for (const con of this.signalConnections) {
             con[0].disconnectSignal(con[1]);
         }
     
-        let sessionObj = new Interfaces.SecretSessionProxy(bus, secretBus,
+        const sessionObj = new Interfaces.SecretSessionProxy(bus, secretBus,
                 this.session);
         sessionObj.CloseSync();
-    },
+    }
     
-    _getSecret: function(path, relock, callback) {
-        let item = new Interfaces.SecretItemProxy(bus, secretBus, path);
+    private _getSecret(path: string, relock: boolean, callback: (label: string, secret: string) => void) {
+        const item = new Interfaces.SecretItemProxy(bus, secretBus, path);
         
-        let secret_res = item.GetSecretSync(this.session);
+        const secret_res = item.GetSecretSync(this.session);
 
-        let label = item.Label;
-        let secret = secret_res[0][2];
+        const label = item.Label;
+        const secret = secret_res[0][2];
 
         if (relock) {
             let res = this.service.LockSync([path]);
             assert(res[1] == "/");
         }
-        
+
         callback(String(label), String(secret));
-    },
+    }
     
     /**
      * Fetch the label and secret of an item with the specified path.
@@ -83,18 +88,18 @@ export const KeyringConnection = new Lang.Class({
      * If unlocking is needed this will only work if imports.mainloop is
      * running.
      */
-    getSecretFromPath: function(path, callback) {
+    getSecretFromPath(path, callback) {
         this.unlockObject(path, (wasLockedBefore) => {
             this._getSecret(path, wasLockedBefore, callback);
         });
-    },
+    }
     
     /**
      * Unlock an object.
      * callback is a function(wasLockedBefore) called with a boolean
      * value that indicates wether the object was locked before.
      */
-    unlockObject: function(path, callback) {
+    unlockObject(path, callback: (lockedBefore: boolean) => void) {
         let result = this.service.UnlockSync([path]);
         let ul_prompt_path = result[1];
         
@@ -111,17 +116,17 @@ export const KeyringConnection = new Lang.Class({
         } else {
             callback(false);
         }
-    },
+    }
     
-    lockObject: function(path) {
-        let res = this.service.LockSync([path]);
+    lockObject(path) {
+        const res = this.service.LockSync([path]);
         assert(res[1] == "/");
-    },
+    }
     
     /**
      * Fetch the label of an item with the specified path.
      */
-    _getItemLabelFromPath: function(path) {
+    private _getItemLabelFromPath(path) {
         if (this.labelCache[path]) {
             return this.labelCache[path];
         } else {
@@ -129,7 +134,7 @@ export const KeyringConnection = new Lang.Class({
             this.labelCache[path] = item.Label;
             return item.Label;
         }
-    },
+    }
     
     /**
      * Return all secret items that match a number of search strings.
@@ -137,7 +142,7 @@ export const KeyringConnection = new Lang.Class({
      *                 label of matching secret items
      * @return An array of matching secret items (see makeItem for details)
      */
-    getItems: function(searchStrs) {
+    getItems(searchStrs: string[]) {
         searchStrs.map(s => s.toLowerCase());
     
         let searchResult = this.service.SearchItemsSync([]);
@@ -161,13 +166,13 @@ export const KeyringConnection = new Lang.Class({
         }
         
         return matchingItems;
-    },
+    }
     
     /**
      * Return all collections as items (see makeItem for details).
      * Each collection item additionally has a boolean flag locked.
      */
-    getCollections: function() {
+    getCollections() {
         let res = []
         for (let i in this.service.Collections) {
             let path = this.service.Collections[i];
@@ -177,12 +182,12 @@ export const KeyringConnection = new Lang.Class({
             res.push(item);
         }
         return res;
-    },
+    }
     
     /**
      * @callback is called whenever a collection is created, deleted or changed.
      */
-    connectCollectionChangedSignal: function(callback) {
+    connectCollectionChangedSignal(callback: () => void) {
         this.signalConnections.push([this.service,
             this.service.connectSignal("CollectionCreated", function (collection) {
                 callback();
@@ -199,4 +204,4 @@ export const KeyringConnection = new Lang.Class({
             })
         ]);
     }
-})
+}
