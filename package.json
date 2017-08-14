@@ -1,11 +1,8 @@
 {
   "name": "gnome-keyring-js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Gnome keyring access via gnome's JavaScript bindings",
   "main": "src/main.ts",
-  "bin": {
-    "gnome-keyring-js": "keyringDbus.js"
-  },
   "dependencies": {},
   "devDependencies": {
     "gir2dts": "^0.1.3",
