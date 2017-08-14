@@ -5,7 +5,7 @@
  * See file LICENSE for details.
  */
 
-const Gio = imports.gi.Gio;
+import * as Gio from "Gio";
 
 const SecretServiceInterface = "<node> \
 <interface name='org.freedesktop.Secret.Service'> \
@@ -74,7 +74,7 @@ const SecretServiceInterface = "<node> \
  \
 </interface> \
 </node>";
-const SecretServiceProxy = Gio.DBusProxy.makeProxyWrapper(SecretServiceInterface);
+export const SecretServiceProxy = Gio.DBusProxy.makeProxyWrapper(SecretServiceInterface);
 
 
 const SecretItemInterface = "<node> \
@@ -97,7 +97,7 @@ const SecretItemInterface = "<node> \
 	</method> \
 </interface> \
 </node>";
-const SecretItemProxy = Gio.DBusProxy.makeProxyWrapper(SecretItemInterface);
+export const SecretItemProxy = Gio.DBusProxy.makeProxyWrapper(SecretItemInterface);
 
 
 const SecretPromptInterface = '<node> \
@@ -112,14 +112,14 @@ const SecretPromptInterface = '<node> \
     </signal> \
 </interface> \
 </node>';
-const SecretPromptProxy = Gio.DBusProxy.makeProxyWrapper(SecretPromptInterface);
+export const SecretPromptProxy = Gio.DBusProxy.makeProxyWrapper(SecretPromptInterface);
 
 const SecretSessionInterface = '<node> \
 <interface  name="org.freedesktop.Secret.Session"> \
     <method name="Close" /> \
 </interface> \
 </node>';
-const SecretSessionProxy = Gio.DBusProxy.makeProxyWrapper(SecretSessionInterface);
+export const SecretSessionProxy = Gio.DBusProxy.makeProxyWrapper(SecretSessionInterface);
 
 const SecretCollectionInterface = '<node> \
 <interface name="org.freedesktop.Secret.Collection"> \
@@ -153,5 +153,5 @@ const SecretCollectionInterface = '<node> \
     </signal> \
 </interface> \
 </node>';
-const SecretCollectionProxy = Gio.DBusProxy.makeProxyWrapper(SecretCollectionInterface);
+export const SecretCollectionProxy = Gio.DBusProxy.makeProxyWrapper(SecretCollectionInterface);
 

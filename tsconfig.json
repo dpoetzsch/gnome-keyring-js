@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "target": "es5",                    // es5 compatability for gjs
+        "module": "amd",                    // pack using amd module format
+        "rootDir": "src",                   // module names based from src
+        "outFile": "dist/keyringDbus.js",      // the target executable
+        "allowJs": true 
+    },
+    "files": [
+        "node_modules/gir2dts/src/gjs.d.ts",            // Gjs
+        "node_modules/gir2dts/src/gobject-2.0.d.ts",    // GObject
+        "node_modules/gir2dts/src/atk-1.0.d.ts",        // Atk
+        "node_modules/gir2dts/src/glib-2.0.d.ts",       // GLib
+        "node_modules/gir2dts/src/gio-2.0.d.ts",        // Gio
+        "node_modules/gir2dts/src/gdk-3.0.d.ts",        // Gdk
+        "node_modules/gir2dts/src/gtk-3.0.d.ts",        // Gtk
+        "node_modules/gir2dts/src/pango-1.0.d.ts",      // Pango
+        "node_modules/gir2dts/src/gjs.js",              // module loader/helper
+
+        "src/main.ts",
+
+        "src/exports.js"
+    ]
+}

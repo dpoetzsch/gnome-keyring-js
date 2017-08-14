@@ -1,4 +1,4 @@
-imports.searchPath.push('.');
+imports.searchPath.push('dist');
 const KeyringConnection = imports.keyringDbus.KeyringConnection;
 
 let con = new KeyringConnection();

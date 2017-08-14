@@ -5,24 +5,23 @@
  * See file LICENSE for details.
  */
 
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
-const Lang = imports.lang;
+import * as Gio from "Gio";
+import * as GLib from "GLib";
+import * as Lang from "Lang";
 
 //imports.searchPath.push('.');
 //const Interfaces = imports.keyringInterfaces;
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Interfaces = Me.imports.keyringInterfaces;
-const assert = Me.imports.utils.assert;
+import * as Interfaces from './keyring-interfaces';
+import { assert } from "./utils";
 
 const bus = Gio.DBus.session;
 const secretBus = 'org.freedesktop.secrets';
 
-function makeItem(label, path) {
+export function makeItem(label, path) {
     return {"label":label, "path":path};
 }
 
-const KeyringConnection = new Lang.Class({
+export const KeyringConnection = new Lang.Class({
     Name: "KeyringConnection",
     
     _init: function() {
