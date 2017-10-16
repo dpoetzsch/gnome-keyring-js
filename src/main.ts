@@ -182,8 +182,8 @@ export class KeyringConnection {
      * Return all collections as items (see makeItem for details).
      * Each collection item additionally has a boolean flag locked.
      */
-    getCollections() {
-        let res = []
+    getCollections(): Item[] {
+        let res: Item[] = [];
         for (let i in this.service.Collections) {
             let path = this.service.Collections[i];
             let col = new Interfaces.SecretCollectionProxy(bus, secretBus, path);
