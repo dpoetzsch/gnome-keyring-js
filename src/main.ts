@@ -180,7 +180,7 @@ export class KeyringConnection {
 
             let labelLow = label.toLowerCase();
             let isMatch = true;
-            for (const s in searchStrs) {
+            for (const s of searchStrs) {
                 if (labelLow.indexOf(s) === -1) {
                     isMatch = false;
                     break;

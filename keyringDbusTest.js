@@ -17,16 +17,19 @@ let con = new KeyringConnection();
 
 // Test caching (should be really fast in the second run and just a bit slower in the third)
 let t1 = Date.now();
-con.getItems(['meetup']);
+let items = con.getItems(['github']);
+print('Item count: ' + items.length);
 print('First run: ' + (Date.now() - t1));
 
 t1 = Date.now();
-con.getItems(['meetup']);
+items = con.getItems(['github']);
+print('Item count: ' + items.length);
 print('Second run: ' + (Date.now() - t1));
 
 con.unlockObject('/org/freedesktop/secrets/collection/test', function() {
     t1 = Date.now();
-    con.getItems(['meetup']);
+    items = con.getItems(['github']);
+    print('Item count: ' + items.length);
     print('Third run: ' + (Date.now() - t1));
 });
 
