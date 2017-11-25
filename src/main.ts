@@ -36,7 +36,7 @@ export class KeyringConnection {
     private service;
     private session;
     private signalConnections: SignalConnection[];
-    private labelCache;
+    private labelCache: { [key: string]: string | null | undefined };
 
     constructor() {
         this.service = new Interfaces.SecretServiceProxy(bus,
@@ -82,6 +82,17 @@ export class KeyringConnection {
 
         callback(String(label), String(secret));
     }
+
+    /**
+     * Invalidates all entries in the label cache for the specified collection.
+     */
+    private invalidateLabelCache(forCollectionPath: string) {
+        for (const k of Object.keys(this.labelCache)) {
+            if ((k as any).startsWith(forCollectionPath)) {
+                delete this.labelCache[k];
+            }
+        }
+    }
     
     /**
      * Fetch the label and secret of an item with the specified path.
@@ -109,9 +120,13 @@ export class KeyringConnection {
             // in this case the keyring needs to be unlocked by the user
             let prompt = new Interfaces.SecretPromptProxy(bus,
                     secretBus, ul_prompt_path);
-            
+
             this.signalConnections.push([prompt,
                 prompt.connectSignal("Completed", () => {
+                    // invalidate label cache for this collection
+                    // (there might be paths with null values in it)
+                    this.invalidateLabelCache(path);
+
                     callback(true);
                 })]);
             prompt.PromptSync("");
@@ -128,8 +143,8 @@ export class KeyringConnection {
     /**
      * Fetch the label of an item with the specified path.
      */
-    getItemLabelFromPath(path) {
-        if (this.labelCache[path]) {
+    getItemLabelFromPath(path): string | undefined | null {
+        if (this.labelCache.hasOwnProperty(path)) {
             return this.labelCache[path];
         } else {
             const item = new Interfaces.SecretItemProxy(bus, secretBus, path);
@@ -154,10 +169,15 @@ export class KeyringConnection {
     
         const allItems = this.getAllItemPaths();
         
-        let matchingItems = [];
+        let matchingItems: Item[] = [];
         
         for (const path of allItems) {
             let label = this.getItemLabelFromPath(path);
+
+            if (!label) {
+                continue;
+            }
+
             let labelLow = label.toLowerCase();
             let isMatch = true;
             for (const s in searchStrs) {

@@ -4,7 +4,8 @@
         "module": "amd",                    // pack using amd module format
         "rootDir": "src",                   // module names based from src
         "outFile": "dist/keyringDbus.js",      // the target executable
-        "allowJs": true 
+        "strictNullChecks": true,
+        "allowJs": true
     },
     "files": [
         "node_modules/gir2dts/src/gjs.d.ts",            // Gjs
