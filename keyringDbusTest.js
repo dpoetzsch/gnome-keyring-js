@@ -31,6 +31,8 @@ con.unlockObject('/org/freedesktop/secrets/collection/test', function() {
     items = con.getItems(['github']);
     print('Item count: ' + items.length);
     print('Third run: ' + (Date.now() - t1));
+
+    imports.mainloop.quit();
 });
 
 imports.mainloop.run();
