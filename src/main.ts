@@ -17,6 +17,8 @@ import { assert } from "./utils";
 const bus = Gio['DBus'].session;
 const secretBus = 'org.freedesktop.secrets';
 
+const ByteArray = (imports as any).byteArray;
+
 export interface Item {
     label: string;
     path: string;
@@ -80,7 +82,7 @@ export class KeyringConnection {
             assert(res[1] == "/");
         }
 
-        callback(String(label), String(secret));
+        callback(String(label), ByteArray.toString(secret));
     }
 
     /**
